@@ -392,6 +392,32 @@ footer {visibility: hidden;}
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* ========== SIDEBAR TOGGLE BUTTON - LÀM NỔI BẬT ========== */
+/* Làm nổi bật nút ẩn/hiện sidebar mặc định của Streamlit */
+button[kind="header"] {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-radius: 8px !important;
+    padding: 8px !important;
+    transition: all 0.3s ease !important;
+}
+
+button[kind="header"]:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+    transform: scale(1.1) !important;
+}
+
+/* Thêm tooltip cho nút sidebar */
+button[kind="header"]::after {
+    content: '';
+    position: absolute;
+    pointer-events: none;
+}
+
+/* Style cho nút collapse khi sidebar đang mở */
+[data-testid="stSidebar"][aria-expanded="true"] + div button[kind="header"] {
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.5) !important;
+}
+
 /* ========== PREMIUM HEADER BANNER ========== */
 .banner-title-container {
     background: linear-gradient(135deg, #ff6b9d 0%, #ff85a1 50%, #ff6b9d 100%);
@@ -744,69 +770,8 @@ div[data-testid="stSpinner"] > div {
     background: linear-gradient(180deg, #e91e63, #f06292);
 }
 
-/* ========== STICKY "LÊN ĐẦU TRANG" BUTTON ========== */
-.scroll-to-top {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    z-index: 99999 !important;
-    cursor: pointer;
-    animation: fadeInUp 0.5s ease-in-out;
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.scroll-to-top a {
-    display: inline-block;
-    background: linear-gradient(135deg, #ff6b9d 0%, #ff85a1 100%) !important;
-    color: white !important;
-    text-decoration: none !important;
-    padding: 18px 28px !important;
-    border-radius: 50px !important;
-    font-size: 16px !important;
-    font-weight: 700 !important;
-    cursor: pointer !important;
-    box-shadow: 0 8px 25px rgba(255, 107, 157, 0.6),
-                0 4px 12px rgba(0, 0, 0, 0.2) !important;
-    transition: all 0.3s ease !important;
-    border: 2px solid rgba(255, 255, 255, 0.3) !important;
-}
-
-.scroll-to-top a:hover {
-    background: linear-gradient(135deg, #e91e63 0%, #f06292 100%) !important;
-    box-shadow: 0 12px 35px rgba(255, 107, 157, 0.8),
-                0 6px 18px rgba(0, 0, 0, 0.3) !important;
-    transform: translateY(-5px) scale(1.08) !important;
-    border-color: rgba(255, 255, 255, 0.5) !important;
-}
-
-.scroll-to-top a:active {
-    transform: translateY(-2px) scale(1.02) !important;
-}
 
 </style>
-""", unsafe_allow_html=True)
-
-# ========================================
-# NÚT "LÊN ĐẦU TRANG" STICKY (HTML)
-# ========================================
-# Thêm anchor ở đầu trang
-st.markdown('<a id="top-of-page"></a>', unsafe_allow_html=True)
-
-# Tạo nút sticky ở cuối trang
-st.markdown("""
-<div class="scroll-to-top">
-    <a href="#top-of-page">⬆️ Lên đầu trang</a>
-</div>
 """, unsafe_allow_html=True)
 
 
@@ -1349,6 +1314,22 @@ with col_title:
 
 st.markdown('</div>', unsafe_allow_html=True)
 
+# Thông báo hướng dẫn về sidebar
+st.markdown("""
+<div style='
+    background: rgba(255, 182, 193, 0.15);
+    padding: 12px 20px;
+    border-radius: 10px;
+    margin: 15px 0;
+    border-left: 4px solid #ff6b9d;
+'>
+    <p style='margin: 0; color: #c2185b; font-size: 14px;'>
+        <strong>💡 Mẹo:</strong> Bấm vào nút <strong>mũi tên (&gt;)</strong> ở góc trái trên để <strong>ẩn/hiện tab tải file huấn luyện</strong>.
+        Tab này chứa chức năng tải file CSV để xây dựng mô hình dự báo.
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
 # Load dữ liệu huấn luyện (CSV có default, X_1..X_14) - Giữ nguyên logic load data
 try:
     df = pd.read_csv('DATASET.csv', encoding='latin-1')
@@ -1357,8 +1338,30 @@ try:
 except Exception:
     df = None
 
-# DI CHUYỂN UPLOADER VỀ ĐẦU SIDEBAR (Không còn selectbox)
-uploaded_file = st.sidebar.file_uploader("📂 Tải CSV Dữ liệu Huấn luyện", type=['csv'])
+# ========================================
+# SIDEBAR - HƯỚNG DẪN VÀ UPLOAD FILE
+# ========================================
+
+# Thêm header rõ ràng cho sidebar
+st.sidebar.markdown("""
+<div style='
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    border-left: 4px solid #ffb3c6;
+'>
+    <h3 style='color: #ffffff; margin: 0; font-size: 18px;'>
+        📁 TẢI DỮ LIỆU HUẤN LUYỆN
+    </h3>
+    <p style='color: #e8f4f8; margin: 8px 0 0 0; font-size: 13px;'>
+        Tải file CSV để xây dựng mô hình dự báo
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
+# Upload file
+uploaded_file = st.sidebar.file_uploader("📂 Tải CSV Dữ liệu Huấn luyện", type=['csv'], label_visibility="collapsed")
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file, encoding='latin-1')
     MODEL_COLS = [f"X_{i}" for i in range(1, 15)]
@@ -1820,34 +1823,78 @@ with tab_predict:
         ratios_part1 = ratios_display.iloc[:mid_point]
         ratios_part2 = ratios_display.iloc[mid_point:]
 
-        # Hàm styling (GIỮ NGUYÊN)
+        # Hàm styling với màu sắc nhẹ nhàng, ngọt ngào hơn
         def color_ratios(val):
-            """Ánh xạ màu dựa trên tên chỉ số và giá trị (tạm thời để hiển thị đẹp)"""
-            # Chỉ số Thanh khoản (X7, X8) - Green/Yellow
-            if "Thanh toán" in val.name and val.values[0] < 1.0: return ['background-color: #ffcccc' for _ in val] # Dưới 1: Báo động đỏ
-            if "Thanh toán" in val.name and val.values[0] > 1.5: return ['background-color: #ccffcc' for _ in val] # Trên 1.5: Tốt
-            # Chỉ số Nợ (X5, X6) - Red/Green
-            if "Tỷ lệ Nợ/" in val.name and val.values[0] > 1.0: return ['background-color: #ffcccc' for _ in val] # Trên 1: Rủi ro cao
-            if "Tỷ lệ Nợ/" in val.name and val.values[0] < 0.5: return ['background-color: #ccffcc' for _ in val] # Dưới 0.5: Tốt
-            # Chỉ số Sinh lời (X1, X2, X3, X4) - Green/Yellow
+            """Ánh xạ màu dựa trên tên chỉ số và giá trị với palette màu pastel"""
+            value = val.values[0]
+
+            # Màu pastel nhẹ nhàng
+            PASTEL_GREEN = '#d4edda'      # Xanh lá nhạt
+            PASTEL_BLUE = '#d1ecf1'       # Xanh dương nhạt
+            PASTEL_YELLOW = '#fff3cd'     # Vàng nhạt
+            PASTEL_ORANGE = '#ffe8d9'     # Cam nhạt
+            PASTEL_RED = '#f8d7da'        # Đỏ nhạt
+            PASTEL_PURPLE = '#e7d9f5'     # Tím nhạt
+
+            # Chỉ số Thanh khoản (X7, X8) - Quan trọng cho khả năng thanh toán
+            if "Thanh toán" in val.name:
+                if value < 1.0:
+                    return [f'background-color: {PASTEL_RED}; color: #721c24; font-weight: 600;' for _ in val]  # Nguy hiểm
+                elif value >= 2.0:
+                    return [f'background-color: {PASTEL_GREEN}; color: #155724; font-weight: 600;' for _ in val]  # Rất tốt
+                elif value >= 1.5:
+                    return [f'background-color: {PASTEL_BLUE}; color: #0c5460; font-weight: 500;' for _ in val]  # Tốt
+                else:
+                    return [f'background-color: {PASTEL_YELLOW}; color: #856404; font-weight: 500;' for _ in val]  # Cảnh báo
+
+            # Chỉ số Nợ (X5, X6) - Cơ cấu tài chính
+            if "Tỷ lệ Nợ/" in val.name:
+                if value > 2.0:
+                    return [f'background-color: {PASTEL_RED}; color: #721c24; font-weight: 600;' for _ in val]  # Rủi ro cao
+                elif value > 1.0:
+                    return [f'background-color: {PASTEL_ORANGE}; color: #975a16; font-weight: 500;' for _ in val]  # Cảnh báo
+                elif value < 0.5:
+                    return [f'background-color: {PASTEL_GREEN}; color: #155724; font-weight: 600;' for _ in val]  # Rất tốt
+                else:
+                    return [f'background-color: {PASTEL_BLUE}; color: #0c5460; font-weight: 500;' for _ in val]  # Tốt
+
+            # Chỉ số Sinh lời (X1, X2, X3, X4) - Hiệu quả kinh doanh
             if "Lợi nhuận" in val.name or "ROA" in val.name or "ROE" in val.name:
-                if val.values[0] <= 0: return ['background-color: #ffcccc' for _ in val]
-                if val.values[0] > 0.1: return ['background-color: #ccffcc' for _ in val]
-            return [''] * len(val)
+                if value <= 0:
+                    return [f'background-color: {PASTEL_RED}; color: #721c24; font-weight: 600;' for _ in val]  # Lỗ
+                elif value > 0.15:
+                    return [f'background-color: {PASTEL_GREEN}; color: #155724; font-weight: 600;' for _ in val]  # Xuất sắc
+                elif value > 0.08:
+                    return [f'background-color: {PASTEL_BLUE}; color: #0c5460; font-weight: 500;' for _ in val]  # Tốt
+                elif value > 0.03:
+                    return [f'background-color: {PASTEL_YELLOW}; color: #856404; font-weight: 500;' for _ in val]  # Trung bình
+                else:
+                    return [f'background-color: {PASTEL_ORANGE}; color: #975a16; font-weight: 500;' for _ in val]  # Yếu
+
+            # Các chỉ số khác - màu tím pastel nhẹ nhàng
+            return [f'background-color: {PASTEL_PURPLE}; color: #5a395f; font-weight: 500;' for _ in val]
 
         with pd_col_1:
              # Đảm bảo hiển thị Tên biến | Giá trị
-             st.markdown("##### **Chỉ số Tài chính (1/2)**")
+             st.markdown("##### **💰 Chỉ số Tài chính (Phần 1)**")
              st.dataframe(
-                 ratios_part1.style.apply(color_ratios, axis=1).format("{:.4f}").set_properties(**{'font-size': '14px'}),
+                 ratios_part1.style.apply(color_ratios, axis=1).format("{:.4f}").set_properties(**{
+                     'font-size': '14px',
+                     'border-radius': '5px',
+                     'padding': '8px'
+                 }),
                  use_container_width=True
              )
 
         with pd_col_2:
             # Đảm bảo hiển thị Tên biến | Giá trị
-            st.markdown("##### **Chỉ số Tài chính (2/2)**")
+            st.markdown("##### **📈 Chỉ số Tài chính (Phần 2)**")
             st.dataframe(
-                ratios_part2.style.apply(color_ratios, axis=1).format("{:.4f}").set_properties(**{'font-size': '14px'}),
+                ratios_part2.style.apply(color_ratios, axis=1).format("{:.4f}").set_properties(**{
+                    'font-size': '14px',
+                    'border-radius': '5px',
+                    'padding': '8px'
+                }),
                 use_container_width=True
             )
         # ================================================================================================
@@ -1999,41 +2046,55 @@ with tab_predict:
         # Hiển thị PD Stacking nổi bật ở dưới
         st.markdown("##### 🏆 KẾT QUẢ DỰ BÁO CUỐI CÙNG (STACKING MODEL)")
 
-        # Tạo container nổi bật cho PD Stacking
-        stacking_container = st.container()
-        with stacking_container:
+        # Tạo layout để thu nhỏ chiều ngang (chỉ chiếm 1/2 màn hình ở giữa)
+        col_left, col_center, col_right = st.columns([1, 2, 1])
+
+        with col_center:
             # Sử dụng hàm classify_pd để lấy thông tin phân loại
             pd_classification = classify_pd(probs)
 
-            # Sử dụng markdown với style đặc biệt
+            # Sử dụng markdown với style đặc biệt - Màu nhạt hơn
             pd_value_stacking = f"{probs:.2%}" if pd.notna(probs) else "N/A"
+
+            # Tạo màu nhẹ nhàng hơn dựa trên risk level
+            light_colors = {
+                '#28a745': 'rgba(40, 167, 69, 0.15)',    # Xanh lá rất nhạt
+                '#5cb85c': 'rgba(92, 184, 92, 0.15)',    # Xanh lá nhạt
+                '#ffc107': 'rgba(255, 193, 7, 0.15)',    # Vàng nhạt
+                '#fd7e14': 'rgba(253, 126, 20, 0.15)',   # Cam nhạt
+                '#dc3545': 'rgba(220, 53, 69, 0.15)',    # Đỏ nhạt
+                '#6c757d': 'rgba(108, 117, 125, 0.15)'   # Xám nhạt
+            }
+            bg_color = light_colors.get(pd_classification['color'], 'rgba(255, 255, 255, 0.15)')
+            border_color = pd_classification['color']
+            text_color = pd_classification['color']
 
             st.markdown(f"""
             <div style='
-                background: {pd_classification['gradient_color']};
-                border: 3px solid {pd_classification['color']};
+                background: {bg_color};
+                border: 2px solid {border_color};
                 border-radius: 15px;
-                padding: 30px;
+                padding: 25px;
                 text-align: center;
-                box-shadow: 0 10px 30px rgba(255, 107, 157, 0.3);
-                margin: 20px 0;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+                margin: 15px 0;
             '>
-                <div style='font-size: 18px; font-weight: 700; color: #ffffff; margin-bottom: 15px;'>
+                <div style='font-size: 16px; font-weight: 600; color: {text_color}; margin-bottom: 12px;'>
                     🏆 XÁC SUẤT VỠ NỢ (PD) - STACKING MODEL
                 </div>
-                <div style='font-size: 48px; font-weight: 900; color: #ffffff; margin: 20px 0;'>
+                <div style='font-size: 42px; font-weight: 800; color: {text_color}; margin: 15px 0;'>
                     {pd_value_stacking}
                 </div>
-                <div style='font-size: 24px; font-weight: 700; color: #ffffff; margin: 10px 0;'>
+                <div style='font-size: 20px; font-weight: 600; color: {text_color}; margin: 8px 0;'>
                     Rating: {pd_classification['rating']}
                 </div>
-                <div style='font-size: 20px; font-weight: 600; color: #ffffff; background: rgba(0,0,0,0.1); padding: 10px; border-radius: 8px; margin: 10px 0;'>
+                <div style='font-size: 17px; font-weight: 500; color: {text_color}; background: rgba(0,0,0,0.03); padding: 8px; border-radius: 8px; margin: 8px 0;'>
                     {pd_classification['classification']} ({pd_classification['range']})
                 </div>
-                <div style='font-size: 16px; color: #ffffff; margin-top: 10px; font-style: italic;'>
+                <div style='font-size: 14px; color: {text_color}; margin-top: 8px; font-style: italic; opacity: 0.9;'>
                     📊 {pd_classification['meaning']}
                 </div>
-                <div style='font-size: 14px; color: rgba(255,255,255,0.9); margin-top: 15px; font-style: italic;'>
+                <div style='font-size: 12px; color: {text_color}; margin-top: 12px; font-style: italic; opacity: 0.8;'>
                     💡 AI sử dụng kết quả này để phân tích và đề xuất quyết định tín dụng
                 </div>
             </div>
@@ -2380,8 +2441,19 @@ with tab_dashboard:
 
                 if is_macro:
                     # PHÂN TÍCH VĨ MÔ
-                    with st.spinner('🤖 Đang lấy dữ liệu vĩ mô từ Gemini AI...'):
-                        macro_data = get_macro_data_from_ai(api_key)
+                    # Khởi tạo session_state cho macro_data
+                    if 'macro_data_cache' not in st.session_state:
+                        st.session_state['macro_data_cache'] = None
+
+                    # Kiểm tra xem đã có dữ liệu trong cache chưa
+                    if st.session_state['macro_data_cache'] is None:
+                        with st.spinner('🤖 Đang lấy dữ liệu vĩ mô từ Gemini AI...'):
+                            macro_data = get_macro_data_from_ai(api_key)
+                            # Lưu vào session_state để giữ khi rerun
+                            st.session_state['macro_data_cache'] = macro_data
+                    else:
+                        # Lấy từ cache
+                        macro_data = st.session_state['macro_data_cache']
 
                     if macro_data:
                         st.success("✅ Đã lấy thành công dữ liệu vĩ mô!")
@@ -2578,8 +2650,23 @@ Trả lời bằng tiếng Việt, có cấu trúc rõ ràng với các điểm 
 
                 else:
                     # PHÂN TÍCH NGÀNH CỤ THỂ
-                    with st.spinner(f'🤖 Đang lấy dữ liệu ngành "{selected_analysis}" từ Gemini AI...'):
-                        industry_data = get_industry_data_from_ai(api_key, selected_analysis)
+                    # Khởi tạo session_state cho industry_data
+                    if 'industry_data_cache' not in st.session_state:
+                        st.session_state['industry_data_cache'] = None
+                    if 'industry_selected_cache' not in st.session_state:
+                        st.session_state['industry_selected_cache'] = None
+
+                    # Kiểm tra xem ngành đã thay đổi chưa hoặc chưa có cache
+                    if (st.session_state['industry_data_cache'] is None or
+                        st.session_state['industry_selected_cache'] != selected_analysis):
+                        with st.spinner(f'🤖 Đang lấy dữ liệu ngành "{selected_analysis}" từ Gemini AI...'):
+                            industry_data = get_industry_data_from_ai(api_key, selected_analysis)
+                            # Lưu vào session_state
+                            st.session_state['industry_data_cache'] = industry_data
+                            st.session_state['industry_selected_cache'] = selected_analysis
+                    else:
+                        # Lấy từ cache
+                        industry_data = st.session_state['industry_data_cache']
 
                     if industry_data:
                         st.success(f"✅ Đã lấy thành công dữ liệu ngành {selected_analysis}!")
