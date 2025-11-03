@@ -1324,7 +1324,7 @@ st.markdown("""
     border-left: 4px solid #ff6b9d;
 '>
     <p style='margin: 0; color: #c2185b; font-size: 14px;'>
-        <strong>💡 Note:</strong> Bấm vào nút <strong>mũi tên (&gt;)mũi tên (&gt;)</strong> ở góc trái trên để <strong>ẩn/hiện tab tải file huấn luyện</strong>.
+        <strong>💡 Note:</strong> Bấm vào nút <strong>mũi tên (&gt;)(&gt;)</strong> ở góc trái trên để <strong>ẩn/hiện tab tải file huấn luyện</strong>.
         Tab này chứa chức năng tải file CSV để xây dựng mô hình dự báo.
     </p>
 </div>
