@@ -499,6 +499,113 @@ function showAlert(message, type) {
 }
 
 // ===========================
+// Tab Management & News Loading
+// ===========================
+
+// Load news when tab is clicked
+document.addEventListener('DOMContentLoaded', () => {
+    // Listen to main tabs
+    const mainTabs = document.getElementById('mainTabs');
+    if (mainTabs) {
+        mainTabs.addEventListener('shown.bs.tab', (e) => {
+            const target = e.target.getAttribute('data-bs-target');
+
+            // Load news when News tab or Dashboard tab is shown
+            if (target === '#news') {
+                loadNews('newsFullContainer');
+            } else if (target === '#dashboard') {
+                loadNews('newsContainer');
+            }
+        });
+    }
+});
+
+// Load RSS news feeds
+async function loadNews(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    // Show loading
+    container.innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Đang tải...</span>
+            </div>
+            <p class="mt-2">Đang tải tin tức...</p>
+        </div>
+    `;
+
+    try {
+        const response = await fetch(`${API_BASE}/api/rss-feeds`);
+        if (!response.ok) throw new Error('Không thể tải tin tức');
+
+        const data = await response.json();
+
+        if (!data.articles || data.articles.length === 0) {
+            container.innerHTML = `
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Không có tin tức mới
+                </div>
+            `;
+            return;
+        }
+
+        // Display articles
+        let html = '<div class="row">';
+        data.articles.forEach((article, index) => {
+            const date = new Date(article.published);
+            const formattedDate = date.toLocaleString('vi-VN');
+
+            html += `
+                <div class="col-md-6 mb-3">
+                    <div class="news-article">
+                        <div class="news-title">${article.title}</div>
+                        <div class="news-time">
+                            <i class="fas fa-clock"></i> ${formattedDate}
+                        </div>
+                        <div class="news-description mb-2">${article.description || ''}</div>
+                        <a href="${article.link}" target="_blank" class="news-link">
+                            <i class="fas fa-external-link-alt"></i> Đọc thêm
+                        </a>
+                    </div>
+                </div>
+            `;
+
+            // Add row break every 2 articles
+            if ((index + 1) % 2 === 0) {
+                html += '</div><div class="row">';
+            }
+        });
+        html += '</div>';
+
+        container.innerHTML = html;
+
+    } catch (error) {
+        console.error('Error loading news:', error);
+        container.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle"></i>
+                Lỗi khi tải tin tức: ${error.message}
+            </div>
+        `;
+    }
+}
+
+// Smooth tab transitions
+document.querySelectorAll('.premium-tabs .nav-link').forEach(tab => {
+    tab.addEventListener('click', function() {
+        // Add smooth transition effect
+        const tabContent = document.querySelector('.tab-content');
+        if (tabContent) {
+            tabContent.style.opacity = '0';
+            setTimeout(() => {
+                tabContent.style.opacity = '1';
+            }, 150);
+        }
+    });
+});
+
+// ===========================
 // Initialize
 // ===========================
 
